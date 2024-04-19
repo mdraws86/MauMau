@@ -1,0 +1,59 @@
+from Card import Card
+from Deck import Deck
+from Player import Player
+
+class Game:
+    def __init__(self, n_players: int) -> None:
+        '''
+        Method to initialize a game.
+
+        Input:
+            n_players (int): number of players
+
+        Output:
+            None
+        '''
+
+        # We need a deck to play
+        self.deck = Deck()
+
+        players = {}
+        for p in range(1, n_players + 1):
+            players['player' + str(p)] = Player(name = 'Player' + str(p))
+            # draw cards from deck
+            for i in range(7):
+                players['player' + str(p)].get_card(self.deck.deck.pop())
+        
+        self.players = players
+
+        # draw current card from game's deck
+        current_stack_card = self.deck.deck.pop()
+        if current_stack_card.is_face_down:
+            current_stack_card.flip()
+        self.current_stack_card = current_stack_card
+
+    def __repr__(self) -> str:
+        '''Method to print information about the game.
+        
+        Input:
+            None
+
+        Output:
+            String with information about the game.
+        '''
+        return "Number of players: {}".format(len(self.players))
+
+    def play(self):
+        '''
+        tbd
+        '''
+
+        player_order = list(self.players.keys())
+
+        info = "{0}, {1}".format(self.current_stack_card.color, self.current_stack_card.value) if self.current_stack_card.action is None else "{0}, {1}".format(self.current_stack_card.color, self.current_stack_card.action)
+        print('Current stack card: ', info)
+        current_card = self.players['player1'].play_card(self.current_stack_card, self.deck)
+        if current_card is not None:
+            self.current_stack_card = current_card
+        info = "{0}, {1}".format(self.current_stack_card.color, self.current_stack_card.value) if self.current_stack_card.action is None else "{0}, {1}".format(self.current_stack_card.color, self.current_stack_card.action)
+        print('Current stack card: ', info)
