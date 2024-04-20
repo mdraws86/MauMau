@@ -18,7 +18,7 @@ class Game:
         self.deck = Deck()
 
         players = {}
-        players[1] = Player(name = 'Player1')
+        players['player1'] = Player(name = 'Player1')
         for p in range(2, n_players + 1):
             players['player' + str(p)] = ComputerPlayer(name = 'Player' + str(p))
         for p in range(1, n_players + 1):

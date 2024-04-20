@@ -1,6 +1,8 @@
 from Card import Card
 from Deck import Deck
 from typing import List, Tuple
+from collections import Counter
+import random
 
 class Player:
     def __init__(self,
@@ -179,10 +181,59 @@ class Player:
     
     # A class for a computer player is also added
 class ComputerPlayer(Player):
-    def __init__(self, name):
+    def __init__(self, name) -> None:
         '''
-        tbd
+        Method to initialize a computer player. A computer player inherits from a player.
+
+        Input:
+            name (str): name of the player.
+
+        Output:
+            None
         '''
         self.name = name
 
-        Player.__init__(name = self.name)
+        Player.__init__(self, name = self.name)
+
+        # Store the most frequent color except black the computer player has
+        self.most_freq_color = self.find_most_frequent_color()
+
+    def find_most_frequent_color(self) -> str | None:
+        '''Method to find the most frequent color the computer player has.
+        This information makes it easier to decide which color a computer player
+        should wish for when it plays a wildcard.
+        
+        Input:
+            None
+        
+        Output:
+            color (str) or None if player's deck is empty.
+        '''
+        # Store all colors of the cards in a list ecept black
+        colors = [x.color for x in self.cards if x.color != 'black']
+        # Store all black colors in a separate list
+        black = [x.color for x in self.cards if x.color == 'black']
+        if len(colors) > 0:
+            # If the player has colored cards we find the most frequent one
+            counter = Counter(colors)
+            color = counter.most_common()[0][0]
+        elif len(black) > 0:
+            # If the player only has black cards left in its deck, we can choose a color randomly
+            color = random.choice(['red', 'green', 'blue', 'yellow'])
+        else:
+            # In case the player does not have any cards
+            color = None
+        return color
+    
+    def get_card(self, card: Card) -> None:
+        '''Add functionality to count most frequent color to parent method get_card.
+        
+        Input:
+            card (Card): card that should be added to a player's deck
+
+        Output:
+            None
+        '''
+        super().get_card(card)
+        # Update most frequent color
+        self.most_freq_color = self.find_most_frequent_color()
