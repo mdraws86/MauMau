@@ -176,3 +176,13 @@ class Player:
             print("{}: UNO!!!!".format(self.name))
 
         return (played_card, self.wish)
+    
+    # A class for a computer player is also added
+class ComputerPlayer(Player):
+    def __init__(self, name):
+        '''
+        tbd
+        '''
+        self.name = name
+
+        Player.__init__(name = self.name)

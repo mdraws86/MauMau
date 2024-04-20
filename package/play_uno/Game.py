@@ -1,6 +1,6 @@
 from Card import Card
 from Deck import Deck
-from Player import Player
+from Player import Player, ComputerPlayer
 
 class Game:
     def __init__(self, n_players: int) -> None:
@@ -18,11 +18,13 @@ class Game:
         self.deck = Deck()
 
         players = {}
+        players[1] = Player(name = 'Player1')
+        for p in range(2, n_players + 1):
+            players['player' + str(p)] = ComputerPlayer(name = 'Player' + str(p))
         for p in range(1, n_players + 1):
-            players['player' + str(p)] = Player(name = 'Player' + str(p))
             # draw cards from deck
             for i in range(7):
-                players['player' + str(p)].get_card(self.deck.deck.pop())
+                players['player' + str(p)].get_card(self.deck.draw_card())
         
         self.players = players
 
