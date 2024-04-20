@@ -32,6 +32,9 @@ class Game:
             current_stack_card.flip()
         self.current_stack_card = current_stack_card
 
+        # Initialize current wish for a color
+        self.current_wish = None
+
     def __repr__(self) -> str:
         '''Method to print information about the game.
         
@@ -43,17 +46,22 @@ class Game:
         '''
         return "Number of players: {}".format(len(self.players))
 
-    def play(self):
+    def play_round(self):
         '''
         tbd
         '''
 
         player_order = list(self.players.keys())
 
+        if self.current_wish is not None:
+                print("Current wish: ", self.current_wish)
+
         info = "{0}, {1}".format(self.current_stack_card.color, self.current_stack_card.value) if self.current_stack_card.action is None else "{0}, {1}".format(self.current_stack_card.color, self.current_stack_card.action)
-        print('Current stack card: ', info)
-        current_card = self.players['player1'].play_card(self.current_stack_card, self.deck)
+        print('Current stack card: {}'.format(info))
+        current_card, self.current_wish = self.players['player1'].play_card(self.current_stack_card, self.current_wish, self.deck)
+        if self.current_wish is not None:
+                print("Current wish: ", self.current_wish)
         if current_card is not None:
             self.current_stack_card = current_card
         info = "{0}, {1}".format(self.current_stack_card.color, self.current_stack_card.value) if self.current_stack_card.action is None else "{0}, {1}".format(self.current_stack_card.color, self.current_stack_card.action)
-        print('Current stack card: ', info)
+        print('Current stack card: {}\n'.format(info))

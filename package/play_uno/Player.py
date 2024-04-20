@@ -1,6 +1,6 @@
 from Card import Card
 from Deck import Deck
-from typing import List
+from typing import List, Tuple
 
 class Player:
     def __init__(self,
@@ -25,6 +25,8 @@ class Player:
         self.name = name
         self.is_your_turn = is_your_turn
         self.has_won = has_won
+        # Player can wish for a color if he/she plays a wildcard. Wish is initiated here
+        self.wish = None
         self.n_cards = len(self.cards)
 
     def __repr__(self) -> str:
@@ -36,7 +38,7 @@ class Player:
         Output:
             String with information about the player.
         '''
-        return "Name: {0}, \nNumber of cards: {1}".format(self.name, self.n_cards)
+        return "----------------\nName: {0} \nNumber of cards: {1}\n----------------".format(self.name, self.n_cards)
 
     def count_cards(self) -> int:
         '''
@@ -68,57 +70,68 @@ class Player:
         n_cards = self.count_cards()
         self.n_cards = n_cards
 
-    def check_for_valid_cards(self, card: Card, players_deck: Deck) -> bool:
+    def check_for_valid_cards(self, card: Card, wish: str, players_deck: Deck) -> bool:
         '''
         Method to investigate whether the player has a valid card to play for a given card.
 
         Input:
             card (Card): Given card for which the player needs a valid card.
+            wish (str): the color the previous player wished for in case he/she played a wildcard.
             players_deck (List[Card]): a deck to look up. Usually the players's deck.
 
         Output:
             (bool) player has valid card(s) or not.
         '''
         # collect every valid card in a list
-        valid = [x for x in players_deck if ((x.color == card.color or x.value == card.value) and x.action == None and card.action == None) \
-                or ((x.color == card.color or x.action == card.action) and x.value == None and card.value == None) \
-                or x.color == 'black']
+        if card.color == 'black':
+            valid = [x for x in players_deck if x.color == wish.lower()]
+        else:
+            valid = [x for x in players_deck if (x.color == card.color)
+                    or ((x.value == card.value) and card.value is not None) \
+                    or ((x.action == card.action) and card.action is not None) \
+                    or (x.color == 'black')]
         
         if len(valid) == 0:
             return False
         return True
 
-    def play_card(self, card: Card, deck: Deck) -> Card:
+    def play_card(self, card: Card, wish: str, deck: Deck) -> Tuple[Card, str]:
         '''
         Method to play a card depending on the previous played card.
 
         Input:
             card (Card): the previously played card.
+            wish (str): the color the previous player wished for.
             deck (deck): a deck from which the player might draw cards.
 
         Output:
-             Card object the player plays or None if he/she is not able to play a card.
+             played_card (Card): card the player plays or None if he/she is not able to play a card.
+             wish (str): in case of a wild card the color the player wishes for otherwise None.
         '''
 
         # Check for valid cards in player's deck for the uppermost card on the stack
-        has_valid = self.check_for_valid_cards(card, self.cards)
+        has_valid = self.check_for_valid_cards(card, wish, self.cards)
         move = 0 # did player already draw a card?
 
         while not has_valid and move == 0:
             # Player draws card from deck
             self.get_card(deck.draw_card())
 
+            # Update number of cards
+            self.n_cards = self.count_cards()
+
             # Player made a move
             move += 1
             print("{} has drawn a card from the deck.".format(self.name))
 
             # Check again for valid cards in deck
-            has_valid = self.check_for_valid_cards(card, self.cards)
+            has_valid = self.check_for_valid_cards(card, wish, self.cards)
 
         # If the player has no valid card, even if he drew a card from the deck, he/she can't play a card in the current round
         if not has_valid:
             print("{} has no card to play.".format(self.name))
             played_card = None
+            self.wish = None
         else:
             # Initialize a dictionary for the player's cards, so the user can choose a card by its index
             players_cards = {}
@@ -136,20 +149,30 @@ class Player:
             while not valid:
                 index = int(input("Select card from your deck via index: "))
                 # check if the selected card is allowed to played
-                valid = self.check_for_valid_cards(card, [self.cards[index]])
+                valid = self.check_for_valid_cards(card, wish, [self.cards[index]])
                 # if the selected card is allowed to be played we remove it from the player's deck and play it
                 if valid:
                     played_card = self.cards.pop(index)
+                    # in this case player can't wish for a color
+                    self.wish = None
+                    # If the player plays a wildcard, he/she can wish for a color to be played next
+                    if played_card.color == 'black':
+                        self.wish = input("Please choose the color to be played next: ")
+                        # Color has to be checked if valid
+                        while self.wish.lower() not in ['red', 'yellow', 'blue', 'green']:
+                            print("Color invalid. Please select again.")
+                            self.wish = input("Please choose the color to be played next: ")
                 else:
                     print("Card is not valid, please select another one.")
 
-        print(self.__repr__())
-
         # Update amount of cards
         self.n_cards = self.count_cards()
+        
+        # Print current status for player
+        print(self.__repr__())
 
         # If the player has only one card left, he/she has to say 'UNO'
         if self.n_cards == 1:
             print("{}: UNO!!!!".format(self.name))
 
-        return played_card
+        return (played_card, self.wish)
