@@ -133,7 +133,7 @@ class Player:
         if not has_valid:
             print("{} has no card to play.".format(self.name))
             played_card = None
-            self.wish = None
+            self.wish = wish
         else:
             # Initialize a dictionary for the player's cards, so the user can choose a card by its index
             players_cards = {}
