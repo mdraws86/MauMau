@@ -69,6 +69,32 @@ class Player:
         n_cards = self.count_cards()
         self.n_cards = n_cards
 
+    def find_most_frequent_color(self) -> str | None:
+        '''Method to find the most frequent color the computer player has.
+        This information makes it easier to decide which color a computer player
+        should wish for when it plays a wildcard.
+        
+        Input:
+            None
+        
+        Output:
+            color (str) or None if player's deck is empty.
+        '''
+        # Store all colors of the cards in a list ecept black
+        colors = [x.color for x in self.cards if x.color != 'black']
+        # Store all black colors in a separate list
+        black = [x.color for x in self.cards if x.color == 'black']
+        if len(colors) > 0:
+            # If the player has colored cards we find the most frequent one
+            counter = Counter(colors)
+            return counter.most_common()[0][0]
+        elif len(black) > 0:
+            # If the player only has black cards left in its deck, we can choose a color randomly
+            return random.choice(['red', 'green', 'blue', 'yellow'])
+        else:
+            # In case the player does not have any cards
+            return None
+
     def check_for_valid_cards(self, card: Card, wish: str, players_deck: Deck) -> bool:
         '''
         Method to investigate whether the player has a valid card to play for a given card.
@@ -235,33 +261,6 @@ class ComputerPlayer(Player):
         self.most_freq_color = self.find_most_frequent_color()
         # Make sure the game knows that the player is a computer player
         self.is_computer_player = True
-
-    def find_most_frequent_color(self) -> str | None:
-        '''Method to find the most frequent color the computer player has.
-        This information makes it easier to decide which color a computer player
-        should wish for when it plays a wildcard.
-        
-        Input:
-            None
-        
-        Output:
-            color (str) or None if player's deck is empty.
-        '''
-        # Store all colors of the cards in a list ecept black
-        colors = [x.color for x in self.cards if x.color != 'black']
-        # Store all black colors in a separate list
-        black = [x.color for x in self.cards if x.color == 'black']
-        if len(colors) > 0:
-            # If the player has colored cards we find the most frequent one
-            counter = Counter(colors)
-            color = counter.most_common()[0][0]
-        elif len(black) > 0:
-            # If the player only has black cards left in its deck, we can choose a color randomly
-            color = random.choice(['red', 'green', 'blue', 'yellow'])
-        else:
-            # In case the player does not have any cards
-            color = None
-        return color
     
     def get_card(self, card: Card) -> None:
         '''Add functionality to count most frequent color to parent method get_card.
