@@ -127,6 +127,9 @@ class Player:
             else:
                 print("Card has to have action 'draw two'. Select again.")
 
+        # Update number of cards
+        self.n_cards = self.count_cards()
+
         return played_card
 
 

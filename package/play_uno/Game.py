@@ -40,6 +40,9 @@ class Game:
         # Initialize current wish for a color
         self.current_wish = None
 
+        # Initialize current action
+        self.current_action = None
+
         # Initialize how many times 'draw two' has been played
         self.times_draw_two = 0
 
@@ -145,13 +148,25 @@ class Game:
                         self.players[current_player].get_card(self.deck.draw_card())
                     print("{0} has drawn {1} cards from the deck.".format(self.players[current_player].name, 2 * self.times_draw_two))
                     self.times_draw_two = 0
+                    # Update player's number of cards
+                    self.players[current_player].count_cards()
                 else:
                      current_card = self.players[current_player].play_draw_two()
+                     print("{} extends 'draw two'".format(self.players[current_player].name))
+                     # In case the player extended 'draw two' it's the next player's turn
+                     self.update_player_order()
             else:
                 for i in range(2 * self.times_draw_two):
                     self.players[current_player].get_card(self.deck.draw_card())
                 print("{0} has drawn {1} cards from the deck.".format(self.players[current_player].name, 2 * self.times_draw_two))
                 self.times_draw_two = 0
+        # In case the action is 'draw four' the player has no choice
+        elif self.current_stack_card.action == 'choose color and draw four':
+            for i in range(4):
+                self.players[current_player].get_card(self.deck.draw_card())
+            print("{} has drawn 4 cards from the deck".format(self.players[current_player].name))
+        else:
+            pass
                 
         if has_drawn:
             current_card, self.current_wish = self.players[current_player].play_card(self.current_stack_card, self.current_wish, self.deck)
