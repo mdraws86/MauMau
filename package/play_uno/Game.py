@@ -40,8 +40,8 @@ class Game:
         # Initialize current wish for a color
         self.current_wish = None
 
-        # Initialize current action
-        self.current_action = None
+        # Initialize if current player was able to play a card
+        self.previous_player_has_played = True
 
         # Initialize how many times 'draw two' has been played
         self.times_draw_two = 0
@@ -131,7 +131,9 @@ class Game:
 
         info = "{0}, {1}".format(self.current_stack_card.color, self.current_stack_card.value) if self.current_stack_card.action is None else "{0}, {1}".format(self.current_stack_card.color, self.current_stack_card.action)
         print('Current stack card: {}'.format(info))
-        if self.current_stack_card.action == 'draw two':
+        # Complicated loop in case the previous player played 'draw two'
+        # The player has the choice to extend 'draw two' if he can or just draw the requested amount of cards and play a card afterwards
+        if self.current_stack_card.action == 'draw two' and self.previous_player_has_played:
             self.times_draw_two += 1
             # Check if the current player has 'draw two' to extend
             has_draw_two = bool(len([x for x in self.players[current_player].cards if x.action == 'draw two']))
@@ -141,27 +143,38 @@ class Game:
                     has_drawn = False
                 # Else the player can choose how to proceed
                 else:
+                    # Choose between 'extend' and 'draw two'
                     print({'0': 'extend', '1': 'draw {} cards'.format(2 * self.times_draw_two)})
                     has_drawn = bool(int(input("select action by index: ")))
+                # If the player decided not to extend though he could, he/she draws cards and is still alowed to play a card afterwards
                 if has_drawn:
+                    # Draw amount of cards depending on how many times 'draw two' has been extended
                     for i in range(2 * self.times_draw_two):
                         self.players[current_player].get_card(self.deck.draw_card())
                     print("{0} has drawn {1} cards from the deck.".format(self.players[current_player].name, 2 * self.times_draw_two))
+                    # Reset the amount of extensions to zero again
                     self.times_draw_two = 0
                     # Update player's number of cards
                     self.players[current_player].count_cards()
+                # If the player decided to extend
                 else:
+                     # Choose card with action 'draw two' from player's deck
                      current_card = self.players[current_player].play_draw_two()
                      print("{} extends 'draw two'".format(self.players[current_player].name))
+                     # Update stack
+                     self.stack += [current_card]
+                     self.current_stack_card = self.give_current_stack_card()
                      # In case the player extended 'draw two' it's the next player's turn
                      self.update_player_order()
+            # Else the player has no choice than to draw an amount of cards depending on how many times 'draw two' has been extended
             else:
                 for i in range(2 * self.times_draw_two):
                     self.players[current_player].get_card(self.deck.draw_card())
                 print("{0} has drawn {1} cards from the deck.".format(self.players[current_player].name, 2 * self.times_draw_two))
+                # Reset the amount of extensions to zero again
                 self.times_draw_two = 0
         # In case the action is 'draw four' the player has no choice
-        elif self.current_stack_card.action == 'choose color and draw four':
+        elif self.current_stack_card.action == 'choose color and draw four' and self.previous_player_has_played:
             for i in range(4):
                 self.players[current_player].get_card(self.deck.draw_card())
             print("{} has drawn 4 cards from the deck".format(self.players[current_player].name))
@@ -175,6 +188,9 @@ class Game:
             if current_card is not None:
                 self.stack += [current_card]
                 self.current_stack_card = self.give_current_stack_card()
+                self.previous_player_has_played = True
+            else:
+                self.previous_player_has_played = False
             info = "{0}, {1}".format(self.current_stack_card.color, self.current_stack_card.value) if self.current_stack_card.action is None else "{0}, {1}".format(self.current_stack_card.color, self.current_stack_card.action)
             print('Current stack card: {}\n'.format(info))
             if self.current_stack_card.action == 'reverse':
