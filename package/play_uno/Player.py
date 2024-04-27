@@ -28,6 +28,9 @@ class Player:
         # Make sure the game knows that the player is not computer player
         self.is_computer_player = False
 
+        # Store the most frequent color except black the computer player has
+        self.most_freq_color = self.find_most_frequent_color()
+
     def __repr__(self) -> str:
         '''Method to print information about the player.
         
@@ -68,6 +71,8 @@ class Player:
         # Update amount of cards
         n_cards = self.count_cards()
         self.n_cards = n_cards
+        # Update most frequent color
+        self.most_freq_color = self.find_most_frequent_color()
 
     def find_most_frequent_color(self) -> str | None:
         '''Method to find the most frequent color the computer player has.
@@ -155,6 +160,8 @@ class Player:
 
         # Update number of cards
         self.n_cards = self.count_cards()
+        # Update most frequent color
+        self.most_freq_color = self.find_most_frequent_color()
 
         return played_card
 
@@ -231,6 +238,8 @@ class Player:
 
         # Update amount of cards
         self.n_cards = self.count_cards()
+        # Update most frequent color
+        self.most_freq_color = self.find_most_frequent_color()
         
         # Print current status for player
         print(self.__repr__())
@@ -257,20 +266,5 @@ class ComputerPlayer(Player):
 
         Player.__init__(self, name = self.name)
 
-        # Store the most frequent color except black the computer player has
-        self.most_freq_color = self.find_most_frequent_color()
         # Make sure the game knows that the player is a computer player
         self.is_computer_player = True
-    
-    def get_card(self, card: Card) -> None:
-        '''Add functionality to count most frequent color to parent method get_card.
-        
-        Input:
-            card (Card): card that should be added to a player's deck
-
-        Output:
-            None
-        '''
-        super().get_card(card)
-        # Update most frequent color
-        self.most_freq_color = self.find_most_frequent_color()

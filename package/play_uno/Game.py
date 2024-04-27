@@ -132,6 +132,7 @@ class Game:
         if len(self.stack) == 1 and not self.is_deck_refilled and self.current_stack_card.action is not None:
             # If the first card is black, the player can wish for a color
             if self.current_stack_card.color == 'black':
+                print("Most frequent color {0}: {1}".format(self.players[current_player].name, self.players[current_player].most_freq_color))
                 while self.current_wish not in ['red', 'green', 'yellow', 'blue']:
                     self.current_wish = input("Please choose the color to be played next: ").lower()
                 print("{0}: Current wish: {1}".format(self.players[current_player].name, self.current_wish))
@@ -148,7 +149,6 @@ class Game:
                 self.player_order = [self.player_order.pop()] + self.player_order
             else:
                 pass
-
 
         if self.current_wish is not None:
                 print("Current wish: ", self.current_wish)
