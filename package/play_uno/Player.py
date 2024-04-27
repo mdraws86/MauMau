@@ -5,10 +5,7 @@ from collections import Counter
 import random
 
 class Player:
-    def __init__(self,
-                 name: str,
-                 is_your_turn: bool = False,
-                 has_won: bool = False) -> None:
+    def __init__(self, name: str) -> None:
         '''
         Method to initialize a player. A player has no cards at the beginning
         and it's his or her turn or not. He or she has won or not.
@@ -25,11 +22,11 @@ class Player:
         self.cards: List[Card] = []
         # Player has name
         self.name = name
-        self.is_your_turn = is_your_turn
-        self.has_won = has_won
         # Player can wish for a color if he/she plays a wildcard. Wish is initiated here
         self.wish = None
         self.n_cards = len(self.cards)
+        # Make sure the game knows that the player is not computer player
+        self.is_computer_player = False
 
     def __repr__(self) -> str:
         '''Method to print information about the player.
@@ -96,6 +93,45 @@ class Player:
         if len(valid) == 0:
             return False
         return True
+
+    def play_draw_two(self) -> Card:
+        '''Method to play 'draw two' in case a player decides to extend a 'draw two
+        
+        Input:
+            None
+
+        Output:
+            [Card]
+        '''
+        # Initialize a dictionary for the player's cards, so the user can choose a card by its index
+        players_cards = {}
+        # Insert the info of a card
+        for i, c in enumerate(self.cards):
+            if c.is_face_down:
+                c.flip()
+            players_cards[i] = "{0}, {1}".format(c.color, c.value) if c.action is None else "{0}, {1}".format(c.color, c.action)
+        
+        # To give the player an overview, print available cards
+        print("{0}: {1}".format(self.name, players_cards))
+
+        # Initialize 'action'
+        # Only action 'draw two' is valid here
+        action = 'misc'
+
+        # If the player selects an invalid card he has to be asked again to choose one
+        while action != 'draw two':
+            index = int(input("Select card from your deck via index: "))
+            action = self.cards[index].action
+            if action == 'draw two':
+                played_card = self.cards.pop(index)
+            else:
+                print("Card has to have action 'draw two'. Select again.")
+
+        # Update number of cards
+        self.n_cards = self.count_cards()
+
+        return played_card
+
 
     def play_card(self, card: Card, wish: str, deck: Deck) -> Tuple[Card, str]:
         '''
@@ -179,7 +215,7 @@ class Player:
 
         return (played_card, self.wish)
     
-    # A class for a computer player is also added
+# A class for a computer player is also added
 class ComputerPlayer(Player):
     def __init__(self, name) -> None:
         '''
@@ -197,6 +233,8 @@ class ComputerPlayer(Player):
 
         # Store the most frequent color except black the computer player has
         self.most_freq_color = self.find_most_frequent_color()
+        # Make sure the game knows that the player is a computer player
+        self.is_computer_player = True
 
     def find_most_frequent_color(self) -> str | None:
         '''Method to find the most frequent color the computer player has.
