@@ -46,6 +46,10 @@ class Game:
         # Initialize how many times 'draw two' has been played
         self.times_draw_two = 0
 
+        # Initialize a variable tracking if the deck is refilled
+        # so we know if a single card in the stack is the very first card
+        self.is_deck_refilled = False
+
         # Initialize player order
         self.player_order = list(self.players.keys())
 
@@ -122,6 +126,30 @@ class Game:
         current_player = self.player_order[0]
         print("It's {}'s turn".format(current_player))
 
+        # The first card in the stack is drawn automatically. But we have to
+        # take into account the action it might have. This action immediately
+        # has influence on player 1
+        if len(self.stack) == 1 and not self.is_deck_refilled and self.current_stack_card.action is not None:
+            # If the first card is black, the player can wish for a color
+            if self.current_stack_card.color == 'black':
+                while self.current_wish not in ['red', 'green', 'yellow', 'blue']:
+                    self.current_wish = input("Please choose the color to be played next: ").lower()
+                print("{0}: Current wish: {1}".format(self.players[current_player].name, self.current_wish))
+            # If the action of the first card is 'skip' the first player is not allowed to play
+            elif self.current_stack_card.action == 'skip':
+                print("{} skipped.".format(self.players[current_player].name))
+                self.skip_player()
+                current_player = self.player_order[0]
+                print("Next player:")
+                print(self.player_order[0])
+            # If the action of the first card is 'reverse' the first player is allowed to play but the order is reversed afterwards
+            elif self.current_stack_card.action == 'reverse':
+                self.reverse_player_order()
+                self.player_order = [self.player_order.pop()] + self.player_order
+            else:
+                pass
+
+
         if self.current_wish is not None:
                 print("Current wish: ", self.current_wish)
 
@@ -166,6 +194,10 @@ class Game:
                      self.current_stack_card = self.give_current_stack_card()
                      # In case the player extended 'draw two' it's the next player's turn
                      self.update_player_order()
+                     info = "{0}, {1}".format(self.current_stack_card.color, self.current_stack_card.value) if self.current_stack_card.action is None else "{0}, {1}".format(self.current_stack_card.color, self.current_stack_card.action)
+                     print('Current stack card: {}\n'.format(info))
+                     print("Next_player:")
+                     print(self.player_order[0])
             # Else the player has no choice than to draw an amount of cards depending on how many times 'draw two' has been extended
             else:
                 for i in range(2 * self.times_draw_two):
@@ -214,3 +246,4 @@ class Game:
              random.shuffle(self.stack)
              self.deck = self.stack + self.deck
              self.stack = [uppermost_card]
+             self.is_deck_refilled = True
