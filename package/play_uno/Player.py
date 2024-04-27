@@ -163,6 +163,10 @@ class Player:
         # Update most frequent color
         self.most_freq_color = self.find_most_frequent_color()
 
+        # If the player has only one card left, he/she has to say 'UNO'
+        if self.n_cards == 1:
+            print("{}: UNO!!!!".format(self.name))
+
         return played_card
 
 

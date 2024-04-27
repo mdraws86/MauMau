@@ -142,7 +142,7 @@ class Game:
                 self.skip_player()
                 current_player = self.player_order[0]
                 print("Next player:")
-                print(self.player_order[0])
+                print(self.player_order[0] + "\n")
             # If the action of the first card is 'reverse' the first player is allowed to play but the order is reversed afterwards
             elif self.current_stack_card.action == 'reverse':
                 self.reverse_player_order()
@@ -197,7 +197,7 @@ class Game:
                      info = "{0}, {1}".format(self.current_stack_card.color, self.current_stack_card.value) if self.current_stack_card.action is None else "{0}, {1}".format(self.current_stack_card.color, self.current_stack_card.action)
                      print('Current stack card: {}\n'.format(info))
                      print("Next_player:")
-                     print(self.player_order[0])
+                     print(self.player_order[0] + "\n")
             # Else the player has no choice than to draw an amount of cards depending on how many times 'draw two' has been extended
             else:
                 for i in range(2 * self.times_draw_two):
@@ -225,11 +225,11 @@ class Game:
                 self.previous_player_has_played = False
             info = "{0}, {1}".format(self.current_stack_card.color, self.current_stack_card.value) if self.current_stack_card.action is None else "{0}, {1}".format(self.current_stack_card.color, self.current_stack_card.action)
             print('Current stack card: {}\n'.format(info))
-            if self.current_stack_card.action == 'reverse':
+            if self.current_stack_card.action == 'reverse' and self.previous_player_has_played:
                 self.reverse_player_order()
                 print("Next_player:")
                 print(self.player_order[0])
-            elif self.current_stack_card.action == 'skip':
+            elif self.current_stack_card.action == 'skip' and self.previous_player_has_played:
                 self.skip_player()
                 print("Next player:")
                 print(self.player_order[0])
@@ -247,3 +247,18 @@ class Game:
              self.deck = self.stack + self.deck
              self.stack = [uppermost_card]
              self.is_deck_refilled = True
+
+    def play(self) -> None:
+        '''Method to repeat play_round as long as all players have cards.
+        
+        Input:
+            None
+
+        Output:
+            None
+        '''
+
+        while not any([self.players[player].n_cards == 0 for player in self.players.keys()]):
+            self.play_round()
+        winner = [self.players[player].name for player in self.players.keys() if self.players[player].n_cards == 0][0]
+        print("-----------------\n-----------------\nWinner {}!!!!\n-----------------\n-----------------".format(winner))
