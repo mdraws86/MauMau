@@ -3,6 +3,7 @@ from Deck import Deck
 from Player import Player, ComputerPlayer
 from typing import Dict, List
 import random
+import time
 
 class Game:
     def __init__(self, n_players: int) -> None:
@@ -268,5 +269,7 @@ class Game:
         # Play until the first player has no more cards
         while not any([self.players[player].n_cards == 0 for player in self.players.keys()]):
             self.play_round()
+            # Wait 2 seconds for the next round
+            time.sleep(2)
         winner = [self.players[player].name for player in self.players.keys() if self.players[player].n_cards == 0][0]
         print("-----------------\n-----------------\nWinner {}!!!!\n-----------------\n-----------------".format(winner))
