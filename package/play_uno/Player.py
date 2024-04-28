@@ -272,3 +272,54 @@ class ComputerPlayer(Player):
 
         # Make sure the game knows that the player is a computer player
         self.is_computer_player = True
+
+    def return_valid_cards(self, current_stack_card: Card, current_wish: str|None = None) -> List[Card]:
+        '''Method to give valid cards for a given situation as a list.
+        
+        Input:
+            current_stack_card [Card]: the current card on the stack or the card just played by the previous player.
+            current_wish [str|None]: the current wish for a color or None if there is no current wish.
+
+        Output:
+            List[Card]: list of cards valid to play.
+        '''
+        # collect every valid card in a list
+        if current_stack_card.color == 'black':
+            valid = [x for x in self.cards if x.color == current_wish.lower()]
+        elif current_stack_card.action == 'draw two':
+            valid = [x for x in self.cards if x.action == 'draw two']
+        else:
+            valid = [x for x in self.cards if (x.color == current_stack_card.color)
+                    or ((x.value == current_stack_card.value) and current_stack_card.value is not None) \
+                    or ((x.action == current_stack_card.action) and current_stack_card.action is not None) \
+                    or (x.color == 'black')]
+        
+        return valid
+
+    def play_draw_two(self, current_stack_card: Card) -> Card:
+        '''Method to play 'draw two' for a computer player automatically.
+        
+        Input:
+            current_stack_card [Card]: the current card on the stack or the card just played by the previous player.
+
+        Output:
+            [Card]
+        '''
+        # Determine all valid cards (here all 'draw two')
+        valid = self.return_valid_cards(current_stack_card = current_stack_card)
+
+        # A valid card is chosen randomly for the computer player
+        card = random.choice(valid) if len(valid) > 0 else None
+        index = self.cards.index(card)
+        played_card = self.cards.pop(index)
+
+        # Update number of cards
+        self.n_cards = self.count_cards()
+        # Update most frequent color
+        self.most_freq_color = self.find_most_frequent_color()
+
+        # If the player has only one card left, it has to say 'UNO'
+        if self.n_cards == 1:
+            print("{}: UNO!!!!".format(self.name))
+
+        return played_card

@@ -187,7 +187,10 @@ class Game:
                 # If the player decided to extend
                 else:
                      # Choose card with action 'draw two' from player's deck
-                     current_card = self.players[current_player].play_draw_two()
+                     if not self.players[current_player].is_computer_player:
+                        current_card = self.players[current_player].play_draw_two()
+                     else:
+                         current_card = self.players[current_player].play_draw_two(self.current_stack_card)
                      print("{} extends 'draw two'".format(self.players[current_player].name))
                      # Update stack
                      self.stack += [current_card]
@@ -258,6 +261,7 @@ class Game:
             None
         '''
 
+        # Play until the first player has no more cards
         while not any([self.players[player].n_cards == 0 for player in self.players.keys()]):
             self.play_round()
         winner = [self.players[player].name for player in self.players.keys() if self.players[player].n_cards == 0][0]
