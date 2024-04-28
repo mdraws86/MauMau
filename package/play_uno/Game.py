@@ -3,6 +3,7 @@ from Deck import Deck
 from Player import Player, ComputerPlayer
 from typing import Dict, List
 import random
+import time
 
 class Game:
     def __init__(self, n_players: int) -> None:
@@ -132,6 +133,7 @@ class Game:
         if len(self.stack) == 1 and not self.is_deck_refilled and self.current_stack_card.action is not None:
             # If the first card is black, the player can wish for a color
             if self.current_stack_card.color == 'black':
+                print("Most frequent color {0}: {1}".format(self.players[current_player].name, self.players[current_player].most_freq_color))
                 while self.current_wish not in ['red', 'green', 'yellow', 'blue']:
                     self.current_wish = input("Please choose the color to be played next: ").lower()
                 print("{0}: Current wish: {1}".format(self.players[current_player].name, self.current_wish))
@@ -141,14 +143,13 @@ class Game:
                 self.skip_player()
                 current_player = self.player_order[0]
                 print("Next player:")
-                print(self.player_order[0])
+                print(self.player_order[0] + "\n")
             # If the action of the first card is 'reverse' the first player is allowed to play but the order is reversed afterwards
             elif self.current_stack_card.action == 'reverse':
                 self.reverse_player_order()
                 self.player_order = [self.player_order.pop()] + self.player_order
             else:
                 pass
-
 
         if self.current_wish is not None:
                 print("Current wish: ", self.current_wish)
@@ -187,7 +188,10 @@ class Game:
                 # If the player decided to extend
                 else:
                      # Choose card with action 'draw two' from player's deck
-                     current_card = self.players[current_player].play_draw_two()
+                     if not self.players[current_player].is_computer_player:
+                        current_card = self.players[current_player].play_draw_two()
+                     else:
+                         current_card = self.players[current_player].play_draw_two(self.current_stack_card)
                      print("{} extends 'draw two'".format(self.players[current_player].name))
                      # Update stack
                      self.stack += [current_card]
@@ -197,12 +201,14 @@ class Game:
                      info = "{0}, {1}".format(self.current_stack_card.color, self.current_stack_card.value) if self.current_stack_card.action is None else "{0}, {1}".format(self.current_stack_card.color, self.current_stack_card.action)
                      print('Current stack card: {}\n'.format(info))
                      print("Next_player:")
-                     print(self.player_order[0])
+                     print(self.player_order[0] + "\n")
             # Else the player has no choice than to draw an amount of cards depending on how many times 'draw two' has been extended
             else:
                 for i in range(2 * self.times_draw_two):
                     self.players[current_player].get_card(self.deck.draw_card())
                 print("{0} has drawn {1} cards from the deck.".format(self.players[current_player].name, 2 * self.times_draw_two))
+                if self.players[current_player].is_computer_player:
+                    self.players[current_player].update_has_drawn(True)
                 # Reset the amount of extensions to zero again
                 self.times_draw_two = 0
         # In case the action is 'draw four' the player has no choice
@@ -223,13 +229,15 @@ class Game:
                 self.previous_player_has_played = True
             else:
                 self.previous_player_has_played = False
+            if self.players[current_player].is_computer_player:
+                    self.players[current_player].update_has_drawn(False)
             info = "{0}, {1}".format(self.current_stack_card.color, self.current_stack_card.value) if self.current_stack_card.action is None else "{0}, {1}".format(self.current_stack_card.color, self.current_stack_card.action)
             print('Current stack card: {}\n'.format(info))
-            if self.current_stack_card.action == 'reverse':
+            if self.current_stack_card.action == 'reverse' and self.previous_player_has_played:
                 self.reverse_player_order()
                 print("Next_player:")
                 print(self.player_order[0])
-            elif self.current_stack_card.action == 'skip':
+            elif self.current_stack_card.action == 'skip' and self.previous_player_has_played:
                 self.skip_player()
                 print("Next player:")
                 print(self.player_order[0])
@@ -247,3 +255,21 @@ class Game:
              self.deck = self.stack + self.deck
              self.stack = [uppermost_card]
              self.is_deck_refilled = True
+
+    def play(self) -> None:
+        '''Method to repeat play_round as long as all players have cards.
+        
+        Input:
+            None
+
+        Output:
+            None
+        '''
+
+        # Play until the first player has no more cards
+        while not any([self.players[player].n_cards == 0 for player in self.players.keys()]):
+            self.play_round()
+            # Wait 2 seconds for the next round
+            time.sleep(2)
+        winner = [self.players[player].name for player in self.players.keys() if self.players[player].n_cards == 0][0]
+        print("-----------------\n-----------------\nWinner {}!!!!\n-----------------\n-----------------".format(winner))
