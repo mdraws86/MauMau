@@ -206,6 +206,8 @@ class Game:
                 for i in range(2 * self.times_draw_two):
                     self.players[current_player].get_card(self.deck.draw_card())
                 print("{0} has drawn {1} cards from the deck.".format(self.players[current_player].name, 2 * self.times_draw_two))
+                if self.players[current_player].is_computer_player:
+                    self.players[current_player].update_has_drawn(True)
                 # Reset the amount of extensions to zero again
                 self.times_draw_two = 0
         # In case the action is 'draw four' the player has no choice
@@ -226,6 +228,8 @@ class Game:
                 self.previous_player_has_played = True
             else:
                 self.previous_player_has_played = False
+            if self.players[current_player].is_computer_player:
+                    self.players[current_player].update_has_drawn(False)
             info = "{0}, {1}".format(self.current_stack_card.color, self.current_stack_card.value) if self.current_stack_card.action is None else "{0}, {1}".format(self.current_stack_card.color, self.current_stack_card.action)
             print('Current stack card: {}\n'.format(info))
             if self.current_stack_card.action == 'reverse' and self.previous_player_has_played:

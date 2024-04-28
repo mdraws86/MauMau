@@ -272,6 +272,19 @@ class ComputerPlayer(Player):
 
         # Make sure the game knows that the player is a computer player
         self.is_computer_player = True
+        # Indicator if computer player has drawn cards.
+        self.has_drawn = False
+
+    def update_has_drawn(self, has_drawn: bool) -> None:
+        '''Method to update the indication if the player has drawn cards.
+        
+        Input:
+            has_drawn [bool]: True or False
+
+        Output:
+            None
+        '''
+        self.has_drawn = has_drawn
 
     def return_valid_cards(self, current_stack_card: Card, current_wish: str|None = None) -> List[Card]:
         '''Method to give valid cards for a given situation as a list.
@@ -286,7 +299,7 @@ class ComputerPlayer(Player):
         # collect every valid card in a list
         if current_stack_card.color == 'black':
             valid = [x for x in self.cards if x.color == current_wish.lower()]
-        elif current_stack_card.action == 'draw two':
+        elif current_stack_card.action == 'draw two' and not self.has_drawn:
             valid = [x for x in self.cards if x.action == 'draw two']
         else:
             valid = [x for x in self.cards if (x.color == current_stack_card.color)
@@ -309,7 +322,7 @@ class ComputerPlayer(Player):
         valid = self.return_valid_cards(current_stack_card = current_stack_card)
 
         # A valid card is chosen randomly for the computer player
-        card = random.choice(valid) if len(valid) > 0 else None
+        card = random.choice(valid)
         index = self.cards.index(card)
         played_card = self.cards.pop(index)
 
@@ -323,3 +336,71 @@ class ComputerPlayer(Player):
             print("{}: UNO!!!!".format(self.name))
 
         return played_card
+    
+    def play_card(self, card: Card, wish: str, deck: Deck) -> Tuple[Card, str]:
+        '''
+        Method to play a card depending on the previous played card for a computer player automatically.
+
+        Input:
+            card (Card): the previously played card.
+            wish (str): the color the previous player wished for.
+            deck (deck): a deck from which the player might draw cards.
+
+        Output:
+             played_card (Card): card the player plays or None if he/she is not able to play a card.
+             wish (str): in case of a wild card the color the player wishes for otherwise None.
+        '''
+
+        # Check for valid cards in player's deck for the uppermost card on the stack
+        has_valid = self.check_for_valid_cards(card, wish, self.cards)
+        move = 0 # did player already draw a card?
+
+        while not has_valid and move == 0:
+            # Player draws card from deck
+            self.get_card(deck.draw_card())
+
+            # Update number of cards
+            self.n_cards = self.count_cards()
+
+            # Player made a move
+            move += 1
+            print("{} has drawn a card from the deck.".format(self.name))
+
+            # Check again for valid cards in deck
+            has_valid = self.check_for_valid_cards(card, wish, self.cards)
+
+        # If the player has no valid card, even if he drew a card from the deck, he/she can't play a card in the current round
+        if not has_valid:
+            print("{} has no card to play.".format(self.name))
+            played_card = None
+            self.wish = wish
+        else:
+            # Query all valid cards into list
+            valid = self.return_valid_cards(card, wish)
+            # A valid card is chosen randomly
+            designated_card = random.choice(valid)
+            index = self.cards.index(designated_card)
+            # We remove the selected card from the computer player's deck and play it
+            played_card = self.cards.pop(index)
+            # in this case player can't wish for a color
+            self.wish = None
+            # If the player plays a wildcard, he/she can wish for a color to be played next
+            if played_card.color == 'black':
+                self.wish = self.find_most_frequent_color()
+                # if the computer player only has black cards a color is chosen randomly
+                if self.wish is None:
+                    self.wish = random.choice(['red', 'yellow', 'blue', 'green'])
+
+        # Update amount of cards
+        self.n_cards = self.count_cards()
+        # Update most frequent color
+        self.most_freq_color = self.find_most_frequent_color()
+        
+        # Print current status for player
+        print(self.__repr__())
+
+        # If the player has only one card left, he/she has to say 'UNO'
+        if self.n_cards == 1:
+            print("{}: UNO!!!!".format(self.name))
+
+        return (played_card, self.wish)
