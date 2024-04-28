@@ -163,6 +163,9 @@ class Player:
         # Update most frequent color
         self.most_freq_color = self.find_most_frequent_color()
 
+        # Print current status for player
+        print(self.__repr__())
+
         # If the player has only one card left, he/she has to say 'UNO'
         if self.n_cards == 1:
             print("{}: UNO!!!!".format(self.name))
@@ -331,6 +334,12 @@ class ComputerPlayer(Player):
         # Update most frequent color
         self.most_freq_color = self.find_most_frequent_color()
 
+        # Print the card the computer player plays
+        print("{0} plays {1}".format(self.name, played_card.__repr__()))
+
+        # Print current status for player
+        print(self.__repr__())
+
         # If the player has only one card left, it has to say 'UNO'
         if self.n_cards == 1:
             print("{}: UNO!!!!".format(self.name))
@@ -396,6 +405,10 @@ class ComputerPlayer(Player):
         # Update most frequent color
         self.most_freq_color = self.find_most_frequent_color()
         
+        # Print the card the computer player plays
+        if played_card is not None:
+            print("{0} plays {1}".format(self.name, played_card.__repr__()))
+
         # Print current status for player
         print(self.__repr__())
 
