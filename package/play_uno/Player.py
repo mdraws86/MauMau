@@ -151,7 +151,9 @@ class Player:
 
         # If the player selects an invalid card he has to be asked again to choose one
         while action != 'draw two':
-            index = int(input("Select card from your deck via index: "))
+            index = -1
+            while index not in range(len(self.cards)):
+                index = int(input("Select card from your deck via index: "))
             action = self.cards[index].action
             if action == 'draw two':
                 played_card = self.cards.pop(index)
@@ -225,7 +227,9 @@ class Player:
             valid = False
             # If the player selects an invalid card he has to be asked again to choose one
             while not valid:
-                index = int(input("Select card from your deck via index: "))
+                index = -1
+                while index not in range(len(self.cards)):
+                    index = int(input("Select card from your deck via index: "))
                 # check if the selected card is allowed to played
                 valid = self.check_for_valid_cards(card, wish, [self.cards[index]])
                 # if the selected card is allowed to be played we remove it from the player's deck and play it

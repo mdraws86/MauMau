@@ -1,12 +1,59 @@
 from Card import Card
 from Deck import Deck
 from Player import Player, ComputerPlayer
-from typing import Dict, List
+from typing import List, Annotated, get_type_hints
+from dataclasses import dataclass
 import random
 import time
+import inspect
+
+# Add class to give type hint for number of players with min and max
+# Source: https://stackoverflow.com/questions/66451253/is-there-a-way-to-specify-a-range-of-valid-values-for-a-function-argument-with-t (29th April 2024)
+@dataclass
+class ValueRange:
+    min: float
+    max: float
+    
+    def validate_value(self, x: int) -> None:
+        '''Method to raise an error if value not between min and max
+        
+        Input:
+            x [int]: value for the number of players
+
+        Output:
+            None
+        '''
+        if not (self.min <= x <= self.max):
+            raise ValueError(f'{x} must be in range [{self.min}, {self.max}]')
+        
+def check_annotated(func):
+    '''Function to be used as a decorator to check if the value for the number of players is in the valid range.
+    
+    Input:
+        func: function to be chekced
+
+    Output:
+        None
+    '''
+    hints = get_type_hints(func, include_extras=True)
+    spec = inspect.getfullargspec(func)
+    
+    def wrapper(*args, **kwargs):
+        for idx, arg_name in enumerate(spec[0]):
+            hint = hints.get(arg_name)
+            validators = getattr(hint, '__metadata__', None)
+            if not validators:
+                continue
+            for validator in validators:
+                validator.validate_value(args[idx])
+                
+        return func(*args, **kwargs)
+    return wrapper
+#####################################################
 
 class Game:
-    def __init__(self, n_players: int) -> None:
+    @check_annotated
+    def __init__(self, n_players: Annotated[int, ValueRange(3, 10)]) -> None:
         '''
         Method to initialize a game.
 
