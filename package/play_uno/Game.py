@@ -11,8 +11,8 @@ import inspect
 # Source: https://stackoverflow.com/questions/66451253/is-there-a-way-to-specify-a-range-of-valid-values-for-a-function-argument-with-t (29th April 2024)
 @dataclass
 class ValueRange:
-    min: float
-    max: float
+    min: int
+    max: int
     
     def validate_value(self, x: int) -> None:
         '''Method to raise an error if value not between min and max
@@ -174,6 +174,10 @@ class Game:
         current_player = self.player_order[0]
         print("It's {}'s turn".format(current_player))
 
+        # Print info about prviously played card
+        info = "{0}, {1}".format(self.current_stack_card.color, self.current_stack_card.value) if self.current_stack_card.action is None else "{0}, {1}".format(self.current_stack_card.color, self.current_stack_card.action)
+        print('Current stack card: {}'.format(info))
+
         # The first card in the stack is drawn automatically. But we have to
         # take into account the action it might have. This action immediately
         # has influence on player 1
@@ -187,7 +191,9 @@ class Game:
             # If the action of the first card is 'skip' the first player is not allowed to play
             elif self.current_stack_card.action == 'skip':
                 print("{} skipped.".format(self.players[current_player].name))
-                self.skip_player()
+                # skip Player1
+                skipped = self.player_order.pop(0)
+                self.player_order = self.player_order + [skipped]
                 current_player = self.player_order[0]
                 print("Next player:")
                 print(self.player_order[0] + "\n")
@@ -205,8 +211,6 @@ class Game:
         # Even if there was no 'draw two' card played, we need the variable set to True to play a card
         has_drawn = True
 
-        info = "{0}, {1}".format(self.current_stack_card.color, self.current_stack_card.value) if self.current_stack_card.action is None else "{0}, {1}".format(self.current_stack_card.color, self.current_stack_card.action)
-        print('Current stack card: {}'.format(info))
         # Complicated loop in case the previous player played 'draw two'
         # The player has the choice to extend 'draw two' if he can or just draw the requested amount of cards and play a card afterwards
         if self.current_stack_card.action == 'draw two' and self.previous_player_has_played:
