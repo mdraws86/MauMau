@@ -24,4 +24,4 @@ uno = Game(4)
 uno.play()
 ```
 
-![Game play](/Users/martindraws/Github/UNO/images/Gameplay.png)
+![Game play](https://github.com/mdraws86/UNO/blob/development/images/Gameplay.png)
