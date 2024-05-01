@@ -193,7 +193,7 @@ class Game:
                 print("{} skipped.".format(self.players[current_player].name))
                 # skip Player1
                 skipped = self.player_order.pop(0)
-                self.player_order = self.player_order + [skipped]
+                self.player_order += [skipped]
                 current_player = self.player_order[0]
                 print("Next player:")
                 print(self.player_order[0] + "\n")
@@ -251,7 +251,7 @@ class Game:
                      self.update_player_order()
                      info = "{0}, {1}".format(self.current_stack_card.color, self.current_stack_card.value) if self.current_stack_card.action is None else "{0}, {1}".format(self.current_stack_card.color, self.current_stack_card.action)
                      print('Current stack card: {}\n'.format(info))
-                     print("Next_player:")
+                     print("Next player:")
                      print(self.player_order[0] + "\n")
             # Else the player has no choice than to draw an amount of cards depending on how many times 'draw two' has been extended
             else:
@@ -286,16 +286,16 @@ class Game:
             print('Current stack card: {}\n'.format(info))
             if self.current_stack_card.action == 'reverse' and self.previous_player_has_played:
                 self.reverse_player_order()
-                print("Next_player:")
-                print(self.player_order[0])
+                print("Next player:")
+                print(self.player_order[0] + "\n")
             elif self.current_stack_card.action == 'skip' and self.previous_player_has_played:
                 self.skip_player()
                 print("Next player:")
-                print(self.player_order[0])
+                print(self.player_order[0] + "\n")
             else:
                 self.update_player_order()
-                print("Next_player:")
-                print(self.player_order[0])
+                print("Next player:")
+                print(self.player_order[0] + "\n")
 
         # If the number of cards in the deck gets small we need to fill it up with the cards in the stack again. 
         # Before we do that we keep the uppermost card and sort the other cards in the stack randomly.
